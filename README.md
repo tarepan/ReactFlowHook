@@ -1,6 +1,6 @@
 # FlowHook - React hook for consistent state transition
 `useFlow` is React Hook for "flow", a set of state transition (~ transaction).  
-It works very similar to React official's **suspense for data fetch**.  
+It works similar to React **suspense for data fetch**, but more simple.  
 With `useFlow`, you can avoid accidental *lost update* and *inconsistence between components*.  
 
 ## How to use/works

@@ -1,46 +1,61 @@
-# Getting Started with Create React App
+# FlowHook - React hook for consistent state transition
+`useFlow` is React Hook for "flow", a set of state transition (~ transaction).  
+It works very similar to React official's **suspense for data fetch**.  
+With `useFlow`, you can avoid accidental *lost update* and *inconsistence between components*.  
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## How to use/works
+Very similar to `useState`, but quite safe!  
 
-## Available Scripts
+```tsx
+// a set of state transition (3 independent async data fetch)
+export const fetchProfile = (userId: UserId) => ({
+  userId: Promise.resolve(userId),
+  user: fetchUser(userId),
+  posts: fetchPosts(userId),
+});
 
-In the project directory, you can run:
+// <App>
+export const App: FC = () => {
+  const [state, setFlow] = useFlow({userId: -1, user: { name: "-" }, posts: []});
+  return (
+    <>
+      {/* Update state with asynchronous data fetch */}
+      <button onClick={() => setFlow(fetchProfile(1))}>
+        Load next Profile
+      </button>
+      <ProfilePage state={state} />
+    </>
+  );
+};
 
-### `yarn start`
+// <ProfilePage>
+export const ProfilePage: FC<{ state: Pendable<Profile> }> = (prop) => {
+  // `.user` is fetched `string` or ongoing `Promise<string>`.
+  if (isPromise(prop.state.user)) {
+    return <p>Loading profile...</p>;
+  }
+  return (
+    <>
+      <h1>{prop.state.user.name}</h1>
+      <ProfileTimeline posts={prop.state.posts} />
+    </>
+  );
+};
+```
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+## What is benefit?
+Avoid *Lost Update* and *Inconsistence between components*.  
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+`useState` with `useEffect` for data fetch has common pitfall.  
+It is above two problems (in detail, check [*Suspense for Data Fetching*](https://reactjs.org/docs/concurrent-mode-suspense.html) in React official).  
+It is caused by **manually-controlled concurrent state update flow**.  
+One *flow* update a state, but the other *flow* overwrite the state, then results in *Lost Update*.  
+One *flow* update a part of state, but the other *flow* not yet update other parts, then results in *Inconsistence between components*.  
 
-### `yarn test`
+This hook, `useFlow`, control flows automatically!  
+What you needs is only **declaring which flow should be active now!**  
+By `setFlow()`, an old flow is cancelled implicitly, no fear of *Lost Update*.  
+`setFlow()` accept multi-part flow, all parts of a state is always *consistent*.  
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `yarn build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `yarn eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+## Demo
+Run `npm start`, then get features equivalent to [*Suspense for Data Fetching*](https://reactjs.org/docs/concurrent-mode-suspense.html).  

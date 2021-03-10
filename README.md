@@ -59,3 +59,7 @@ By `setFlow()`, an old flow is cancelled implicitly, no fear of *Lost Update*.
 
 ## Demo
 Run `npm start`, then get features equivalent to [*Suspense for Data Fetching*](https://reactjs.org/docs/concurrent-mode-suspense.html).  
+
+## How to Install
+Not yet packaged,  
+but simply copying a [`useFlow` file](https://github.com/tarepan/ReactFlowHook/blob/main/src/useFlow.ts) is enough! (only 60 lines of code, tiny!)  

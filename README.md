@@ -7,22 +7,22 @@ With `useFlow`, you can avoid accidental *lost update* and *inconsistence betwee
 Very similar to `useState`, but quite safe!  
 
 ```tsx
-// a set of state transition (3 independent async data fetch)
+// a "flow", single set of state transitions written with `Promise`.
 export const fetchProfile = (userId: UserId) => ({
-  userId: Promise.resolve(userId),
-  user: fetchUser(userId),
-  posts: fetchPosts(userId),
+  userId: Promise.resolve(userId), // Promise<number>
+  user: fetchUser(userId), // Promise<{name: string}>
+  posts: fetchPosts(userId), // Promise<Post[]>
 });
 
 // <App>
 export const App: FC = () => {
+  // `state` is automatically and consistently updated by Flow hook.
   const [state, setFlow] = useFlow({userId: -1, user: { name: "-" }, posts: []});
   return (
     <>
-      {/* Update state with asynchronous data fetch */}
-      <button onClick={() => setFlow(fetchProfile(1))}>
-        Load next Profile
-      </button>
+      {/* Update state with asynchronous data fetches. */}
+      <button onClick={() => setFlow(fetchProfile(1))} />
+      {/* Show data. */}
       <ProfilePage state={state} />
     </>
   );
